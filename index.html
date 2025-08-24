@@ -1,125 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PLG’s Filmmaking</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prashantha PLG - Filmmaker</title>
   <style>
     body {
       margin: 0;
-      height: 100vh;
+      padding: 0;
       background: black;
-      overflow: hidden;
       color: white;
       font-family: Arial, sans-serif;
-    }
-    h1 {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 2.5rem;
+      overflow: hidden;
       text-align: center;
-      animation: glow 2s infinite alternate;
     }
+
+    h1 {
+      font-size: 2.5em;
+      margin-top: 40px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
     @keyframes glow {
-      from { text-shadow: 0 0 10px red; }
-      to { text-shadow: 0 0 20px yellow; }
+      from { text-shadow: 0 0 10px red, 0 0 20px orange, 0 0 30px yellow; }
+      to { text-shadow: 0 0 20px blue, 0 0 30px violet, 0 0 40px cyan; }
     }
-    canvas {
+
+    .video-container {
+      margin: 40px auto;
+      width: 80%;
+      max-width: 700px;
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+    }
+
+    .video-container iframe {
       position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      border-radius: 12px;
+    }
+
+    canvas {
+      position: fixed;
       top: 0;
       left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <h1>✨ Welcome to PLG’s Filmmaking Journey ✨</h1>
+  <h1>🎬 I'm PRASHANTHA PLG - An Aspiring Filmmaker 🚀</h1>
+
+  <div class="video-container">
+    <!-- Replace the YouTube link with your own -->
+    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+            title="YouTube video" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen></iframe>
+  </div>
+
   <canvas id="fireworks"></canvas>
+
   <script>
-    const canvas = document.getElementById('fireworks');
-    const ctx = canvas.getContext('2d');
-    resizeCanvas();
-
-    window.addEventListener('resize', resizeCanvas);
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-
-    class Firework {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height;
-        this.targetY = Math.random() * canvas.height / 2;
-        this.color = `hsl(${Math.random() * 360},100%,50%)`;
-        this.particles = [];
-      }
-      update() {
-        if (this.y > this.targetY) {
-          this.y -= 5;
-        } else {
-          this.explode();
-        }
-      }
-      explode() {
-        for (let i = 0; i < 50; i++) {
-          this.particles.push(new Particle(this.x, this.y, this.color));
-        }
-        fireworks.splice(fireworks.indexOf(this), 1);
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-      }
-    }
+    const canvas = document.getElementById("fireworks");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     class Particle {
-      constructor(x, y, color) {
+      constructor(x, y, color, radius) {
         this.x = x;
         this.y = y;
         this.color = color;
+        this.radius = radius;
+        this.alpha = 1;
         this.speedX = (Math.random() - 0.5) * 6;
         this.speedY = (Math.random() - 0.5) * 6;
-        this.life = 100;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
       }
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
-        this.life--;
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
+        this.alpha -= 0.01;
       }
     }
 
-    let fireworks = [];
+    let particles = [];
+
+    function createFirework(x, y) {
+      const colors = ["red", "yellow", "orange", "blue", "purple", "cyan", "lime"];
+      for (let i = 0; i < 100; i++) {
+        particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)], 3));
+      }
+    }
 
     function animate() {
-      ctx.fillStyle = "rgba(0,0,0,0.2)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      if (Math.random() < 0.05) {
-        fireworks.push(new Firework());
-      }
-
-      fireworks.forEach(fw => {
-        fw.update();
-        fw.draw();
-        fw.particles.forEach(p => {
-          p.update();
-          p.draw();
-          if (p.life <= 0) fw.particles.splice(fw.particles.indexOf(p), 1);
-        });
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.update();
+        p.draw();
+        if (p.alpha <= 0) particles.splice(i, 1);
       });
-
       requestAnimationFrame(animate);
     }
+
+    window.addEventListener("click", (e) => {
+      createFirework(e.clientX, e.clientY);
+    });
+
+    setInterval(() => {
+      createFirework(Math.random() * canvas.width, Math.random() * canvas.height / 2);
+    }, 2000);
 
     animate();
   </script>
